@@ -1,1 +1,1 @@
-How to do
+How to do setup
