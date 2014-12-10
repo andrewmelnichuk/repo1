@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -25,10 +26,18 @@ namespace Client
         var input = Console.ReadLine();
         var bytes = Encoding.UTF8.GetBytes(input ?? "");
 
-        var request = new MessageBase(bytes);
+        var message = new MessageBase(bytes);
 
-        socket.Send(BitConverter.GetBytes(8));
-        socket.Send(BitConverter.GetBytes(1L));
+        var stream = new MemoryStream();
+        using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
+          message.Write(writer);
+        stream.Seek(0, SeekOrigin.Begin);
+        
+        socket.Send(BitConverter.GetBytes((int)stream.Length));
+        socket.Send(stream.ToArray());
+
+        stream.Close();
+
 //        // write
 //        MemoryStream stream;
 //        using (stream = new MemoryStream())

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -52,7 +53,7 @@ namespace Server
       {
         try {
           var clientSocket = _socket.Accept();
-          var t = new Thread(HandleClient);
+          var t = new Thread(HandleClient) {IsBackground = true};
           t.Start(clientSocket);
         }
         catch (Exception ex) {
@@ -85,35 +86,32 @@ namespace Server
       Console.WriteLine("client connected {0}:{1}", remEndPoint.Address, remEndPoint.Port);
 
       try {
-        while (true)
+        while (socket.Connected)
         {
-          if (!socket.Connected) break;
-
           // read
-          var readBuf = new byte[4];
-          var r = socket.Receive(readBuf);
-          var bytesRead = BitConverter.ToInt32(readBuf, 0);
-          var readBuf2 = new byte[8];
-          var r2 = socket.Receive(readBuf2);
-          Console.WriteLine(BitConverter.ToInt64(readBuf2, 0));
-//          var request = new MessageBase();
-//          MemoryStream stream;
-          /*
-          using (stream = new MemoryStream(bytesRead)) {
-            while (bytesRead > 0) {
-              var read = socket.Receive(readBuf);
-              stream.Write(readBuf, 0, read);
-              bytesRead -= read;
-            }
+          var lenBuf = new byte[4];
+          var r = socket.Receive(lenBuf);
+          var lenBytes = BitConverter.ToInt32(lenBuf, 0);
 
-            stream.Seek(0, SeekOrigin.Begin);
-            using (var reader = new BinaryReader(stream))
-              request.Read(reader);
-
-            Console.WriteLine("client: #{0} {1}", request.SequenceId,
-              Encoding.UTF8.GetString(request.Data ?? new byte[0]));
+          var stream = new MemoryStream();
+          while (lenBytes > 0) {
+            var dataBuf = new byte[lenBytes];
+            var readBytes = socket.Receive(dataBuf);
+            stream.Write(dataBuf, 0, readBytes);
+            lenBytes -= readBytes;
           }
-          */
+
+          var message = new MessageBase();
+          stream.Seek(0, SeekOrigin.Begin);
+          using (var reader = new BinaryReader(stream))
+            message.Read(reader);
+
+          Console.WriteLine("message received:");
+          Console.WriteLine("uid: " + message.UniqueId);
+          Console.WriteLine("seq id: " + message.SequenceId);
+          Console.WriteLine("data: " + Encoding.UTF8.GetString(message.Data));
+          Console.WriteLine();
+
           // write
 //          request.SequenceId++;
 //

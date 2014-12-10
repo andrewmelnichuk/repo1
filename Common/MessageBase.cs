@@ -19,19 +19,19 @@ namespace Common
     public void Write(BinaryWriter writer)
     {
       //writer.Write(UniqueId.ToByteArray());
-      writer.Write(SequenceId);
+      //writer.Write(SequenceId);
       
-      //writer.Write(Data.Length);
-      //writer.Write(Data);
+      writer.Write(Data.Length);
+      writer.Write(Data);
     }
 
     public void Read(BinaryReader reader)
     {
       //UniqueId = new Guid(reader.ReadBytes(16));
-      SequenceId = reader.ReadInt64();
+      //SequenceId = reader.ReadInt64();
       
-      //var dataLength = reader.ReadInt32();
-      //Data = reader.ReadBytes(dataLength);
+      var dataLength = reader.ReadInt32();
+      Data = reader.ReadBytes(dataLength);
     }
   }
 }
