@@ -1,5 +1,5 @@
 *.user
 *.suo
 _ReSharper.Yuka/
-Web/bin/
-Web/obj/
+*/bin/
+*/obj/
