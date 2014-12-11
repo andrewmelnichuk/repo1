@@ -3,7 +3,7 @@ using System.Web.Routing;
 
 namespace Yuka.Web
 {
-	// Hello world 1
+	// Hello world!
 
 	public class MvcApplication : System.Web.HttpApplication
 	{
