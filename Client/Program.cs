@@ -1,11 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using Common;
 
 namespace Client
 {
@@ -13,30 +8,17 @@ namespace Client
   {
     static void Main(string[] args)
     {
-      Console.WriteLine("connecting to server at tcp://localhost:12345 ...");
+      Console.WriteLine("Connecting to server at tcp://localhost:12345 ...");
 
       var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
       socket.Connect(IPAddress.Loopback, 12345);
 
-      Console.WriteLine("connected to server");
+      Console.WriteLine("Connected to server");
+      Console.ReadLine();
 
-      while (true) {
-        Console.Write("client: ");
-        var input = Console.ReadLine();
-        var bytes = Encoding.UTF8.GetBytes(input ?? "");
-
-        var message = new MessageBase(bytes);
-
-        var stream = new MemoryStream();
-        using (var writer = new BinaryWriter(stream, Encoding.UTF8, true))
-          message.Write(writer);
-        stream.Seek(0, SeekOrigin.Begin);
-        
-        socket.Send(BitConverter.GetBytes((int)stream.Length));
-        socket.Send(stream.ToArray());
-
-        stream.Close();
+      socket.Close();
+      Console.WriteLine("Disconnected");
 
 //        // write
 //        MemoryStream stream;
@@ -48,7 +30,7 @@ namespace Client
 //          socket.Send(stream.ToArray());
 //        }
 
-        // read
+      // read
 //        var lenBuf = new byte[4];
 //        socket.Receive(lenBuf);
 //        var bytesRead = BitConverter.ToInt32(lenBuf, 0);
@@ -68,7 +50,6 @@ namespace Client
 //          Console.WriteLine("server: #{0} {1}", response.SequenceId, 
 //            Encoding.UTF8.GetString(response.Data));
 //        }
-      }
     }
   }
 }

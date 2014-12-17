@@ -1,84 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading;
-using Common;
 
 namespace Server
 {
   class Program
   {
-    private static Socket _socket;
-    private static bool _shutdown;
-
     static void Main(string[] args)
     {
-      OpenSocket();
+      var port = 12345;
+      if (args.Length == 1)
+        Int32.TryParse(args[0], out port);
 
-      var t = new Thread(AcceptSocketProc) {IsBackground = true};
-      t.Start();
+      var service = new Service(port);
+      service.Start();
 
-      Console.WriteLine("server started on port " + ((IPEndPoint)_socket.LocalEndPoint).Port);
-      Console.WriteLine("press ENTER to stop");
-      Console.ReadLine();
-
-      _shutdown = true;
-      CloseSocket();
-      t.Join();
-
-      Console.WriteLine("server stopped");
+      Console.WriteLine("Press ENTER to stop");
+      if (Console.Read() == (int) ConsoleKey.Enter)
+        service.Stop();
     }
 
-    private static void OpenSocket()
-    {
-      _socket = new Socket(SocketType.Stream, ProtocolType.Tcp);
-
-      var endPoind = new IPEndPoint(IPAddress.Any, 12345);
-      
-      _socket.Bind(endPoind);
-      _socket.Listen(10000);
-    }
-
-    private static void CloseSocket()
-    {
-      _socket.Close();
-    }
-
-    private static void AcceptSocketProc()
-    {
-      while (true)
-      {
-        try {
-          var clientSocket = _socket.Accept();
-          var t = new Thread(HandleClient) {IsBackground = true};
-          t.Start(clientSocket);
-        }
-        catch (Exception ex) {
-
-          if (_shutdown) {
-            Console.WriteLine("shutting down...");
-            break;
-          }
-
-          Console.WriteLine(ex.ToString());
-
-          try {
-            Console.WriteLine("reopen socket");
-            CloseSocket();
-            OpenSocket();
-          }
-          catch (Exception ex2) {
-            Console.WriteLine("unable to reopen socket");
-            Console.WriteLine(ex2.ToString());
-            break;
-          }
-        }
-      }
-    }
-
+/*
     private static void HandleClient(object data)
     {
       var socket = (Socket) data;
@@ -127,5 +67,6 @@ namespace Server
         Console.WriteLine(ex);
       }
     }
-  }
+    */
+ }
 }
